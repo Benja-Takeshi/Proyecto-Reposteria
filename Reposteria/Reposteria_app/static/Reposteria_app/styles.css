@@ -1,0 +1,823 @@
+/* ==========================================================================
+   1. VARIABLES Y CONFIGURACIÓN BASE (:root, reset)
+   ========================================================================== */
+:root {
+  --color-primary: #b85a1c;
+  --color-primary-light: #fbeee6;
+  --color-primary-dark: #9c4a14;
+  --color-text: #3a2a1a;
+  --color-muted: #7a5a3a;
+  --color-bg: #fff8f2;
+  --color-white: #fff;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  
+  --radius-pill: 999px;
+  --radius-md: 12px; /* Declarada para evitar inconsistencias en .card */
+  --transition: 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  font-family: Georgia, serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+
+/* ==========================================================================
+   2. COMPONENTES GLOBALES (Botones, Formularios, Utilidades)
+   ========================================================================== */
+
+/* --- Botones Base --- */
+.btn-navbar-carrito, 
+.btn-pedir, 
+.btn-agregar, 
+.carrito-btn, 
+.btn-comprar, 
+.btn-confirmar, 
+.btn-confirmar-pedido, 
+.btn-volver, 
+.btn-ir-productos {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.btn-navbar-carrito:hover, 
+.btn-pedir:hover, 
+.btn-agregar:hover, 
+.carrito-btn:hover, 
+.btn-comprar:hover, 
+.btn-confirmar:hover, 
+.btn-confirmar-pedido:hover, 
+.btn-volver:hover, 
+.btn-ir-productos:hover {
+  background: var(--color-primary-dark);
+}
+
+/* --- Variantes de Botones --- */
+.btn-navbar-carrito, 
+.btn-pedir, 
+.btn-agregar {
+  padding: 8px 18px;
+}
+
+.btn-navbar-carrito:active, 
+.btn-pedir:active, 
+.btn-agregar:active {
+  transform: scale(0.98);
+}
+
+.btn-pedir {
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.btn-agregar {
+  font-size: 0.85rem;
+}
+.btn-agregar:hover {
+  background-color: #9c4a14 !important;
+}
+
+.btn-eliminar {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.btn-eliminar:hover {
+  color: #e74c3c;
+}
+
+.btn-cancelar {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 2px solid #e0d0c0;
+  border-radius: 25px;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-cancelar:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* --- Formularios y Campos de Entrada --- */
+.campo-contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.campo-contenedor label, 
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #4a4a4a;
+}
+
+.campo-contenedor input, 
+.form-group input, 
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0d0c0;
+  border-radius: 10px;
+  background: #fff8f2;
+  font-family: Georgia, serif;
+  color: var(--color-text);
+}
+
+.campo-contenedor input:focus, 
+.form-group input:focus, 
+.form-group textarea:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(181, 84, 26, .12);
+}
+
+.campo-contenedor .texto-ayuda {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.campo-contenedor .texto-error {
+  font-size: 0.8rem;
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+
+/* ==========================================================================
+   3. ESTRUCTURA PERMANENTE (Navbar, Footer)
+   ========================================================================== */
+
+/* --- Navbar --- */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.logo, 
+.navbar-brand {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 1px;
+}
+
+nav ul {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  list-style: none;
+}
+
+nav a, 
+.nav-link {
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+nav a:hover, 
+.nav-link:hover {
+  color: var(--color-primary);
+}
+
+/* --- Footer --- */
+footer {
+  width: 100%;
+  margin-top: auto;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  background: #3a2a1a;
+  border-top: 1px solid #f2e6df;
+}
+
+footer .logo {
+  color: #f9e4d4;
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+}
+
+footer p {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #c4a882;
+}
+
+footer .links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 14px;
+}
+
+footer .links a {
+  color: #c4a882;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+footer .links a:hover {
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   4. VISTA DE TIENDA / PRODUCTOS (Header, Filtros, Grid)
+   ========================================================================== */
+
+/* --- Header de la Página --- */
+.page-header {
+  padding: 80px 30px 70px;
+  text-align: center;
+  background: linear-gradient(135deg, #fbeee6, #fdf0e8);
+  border-bottom: 1px solid #f2e6df;
+}
+
+.page-header h1 {
+  font-size: 2.2rem;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: var(--color-muted);
+  font-size: 1rem;
+}
+
+/* --- Filtros --- */
+.filtros {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 30px 20px 10px;
+}
+
+.filtro-btn {
+  padding: 8px 22px;
+  border: 2px solid var(--color-primary);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.filtro-btn:hover, 
+.filtro-btn.active, 
+.filtro-btn.activo {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* --- Grid de Productos --- */
+.productos {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 40px 60px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 28px;
+}
+
+/* --- Cards de Producto --- */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(184, 90, 28, 0.12);
+}
+
+.card-img {
+  height: 180px;
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
+
+.card-body {
+  padding: 18px;
+}
+
+.categoria-tag {
+  font-size: 0.72rem;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.card-body h3 {
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.card-body p {
+  font-size: 0.83rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.precio {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.sin-resultados {
+  display: none;
+  grid-column: 1 / -1;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+
+/* ==========================================================================
+   5. CARRITO LATERAL (Sidebar panel)
+   ========================================================================== */
+.carrito-btn {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  padding: 14px 22px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+}
+
+.carrito-count {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.carrito-panel {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, .15);
+  z-index: 300;
+  transition: right 0.3s ease;
+}
+
+.carrito-panel.abierto {
+  right: 0;
+}
+
+.carrito-header, 
+.carrito-footer {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0e0d0;
+}
+
+.carrito-footer {
+  border-bottom: none;
+  border-top: 2px solid #f0e0d0;
+}
+
+.carrito-header h2 {
+  font-size: 1.3rem;
+  color: var(--color-primary);
+}
+
+.cerrar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--color-muted);
+}
+
+.carrito-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.carrito-vacio {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+
+/* ==========================================================================
+   6. ELEMENTOS INTERNOS DEL CARRITO (Panel y Página completa)
+   ========================================================================== */
+.item-carrito, 
+.item-carrito-page {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0e0d0;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-info strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.item-info span {
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.item-controles, 
+.item-controles-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-controles button, 
+.item-controles-page button {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--color-primary);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.item-controles button:hover, 
+.item-controles-page button:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.item-cantidad, 
+.item-cantidad-page {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+
+/* ==========================================================================
+   7. SECCIÓN / VISTA: PÁGINA DEL CARRITO FULL-WIDTH
+   ========================================================================== */
+.carrito-page {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 24px 60px;
+  align-items: start;
+}
+
+.carrito-lista h2, 
+.carrito-resumen h2 {
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  color: var(--color-primary);
+}
+
+.carrito-page-vacio {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.carrito-page-vacio p {
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.btn-ir-productos {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.item-img-wrap {
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #f0e0d0;
+}
+
+.item-img, 
+.item-img-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.item-img-placeholder {
+  background: #f0e0d0;
+}
+
+.item-detalles {
+  flex: 1;
+}
+
+.item-detalles strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.item-precio-unit {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.item-subtotal {
+  min-width: 80px;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+
+/* ==========================================================================
+   8. RESUMEN DE COMPRA Y PASARELA DE PAGO
+   ========================================================================== */
+.resumen-box {
+  padding: 20px;
+  margin-bottom: 24px;
+  background: #fff8f2;
+  border-radius: 14px;
+}
+
+.resumen-item-page, 
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+
+.resumen-separador {
+  margin: 12px 0;
+  border-top: 1px solid #e0d0c0;
+}
+
+.resumen-total-page, 
+.resumen-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.formulario-pedido h3 {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: var(--color-text);
+}
+
+.btn-confirmar, 
+.btn-confirmar-pedido {
+  width: 100%;
+  padding: 13px 16px;
+  margin-top: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.btn-confirmar:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- Opciones de Pago --- */
+.pago-opciones {
+  display: flex;
+  gap: 12px;
+}
+
+.pago-opcion {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e0d0c0;
+  border-radius: 10px;
+  text-align: center;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.88rem;
+}
+
+.pago-opcion.seleccionado {
+  border-color: var(--color-primary);
+  background: #fff0e6;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.pago-opcion span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 1.4rem;
+}
+
+
+/* ==========================================================================
+   9. OVERLAYS, MODALES Y VENTANAS DE CONFIRMACIÓN
+   ========================================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .4);
+  z-index: 250;
+  display: none;
+}
+.overlay.visible {
+  display: block;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+}
+.modal.visible {
+  display: flex;
+}
+
+.modal-fondo {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+}
+
+.modal-box {
+  position: relative;
+  z-index: 401;
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 36px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+}
+
+.modal-box h2 {
+  margin-bottom: 6px;
+  color: var(--color-primary);
+  font-size: 1.4rem;
+}
+
+.modal-box > p {
+  margin-bottom: 24px;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+/* --- Estado: Confirmación Éxito --- */
+.confirmacion {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.confirmacion .icono {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.confirmacion h2 {
+  margin-bottom: 10px;
+  color: var(--color-primary);
+}
+
+.confirmacion p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+
+/* ==========================================================================
+   10. MEDIA QUERIES (Responsividad)
+   ========================================================================== */
+@media (max-width: 768px) {
+  nav {
+    padding: 16px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .productos {
+    padding: 24px 20px 40px;
+  }
+  
+  .grid {
+    gap: 20px;
+  }
+  
+  .carrito-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .carrito-page {
+    grid-template-columns: 1fr;
+  }
+}

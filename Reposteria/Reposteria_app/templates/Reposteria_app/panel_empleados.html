@@ -1,0 +1,263 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h2 text-dark font-weight-bold">🧁 Panel Interno de Trabajo</h1>
+      <p class="text-muted m-0">Sesión iniciada como: <strong>{{ request.user.username }}</strong></p>
+    </div>
+    <a href="{% url 'inicio' %}" class="btn btn-outline-secondary">Volver a la Tienda</a>
+  </div>
+
+  <!-- Menú de Pestañas de Navegación -->
+  <ul class="nav nav-tabs mb-4" id="panelTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active fw-bold" id="productos-tab" data-bs-toggle="tab" data-bs-target="#productos-pane" type="button" role="tab">🍪 Inventario de Productos</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-bold text-primary" id="pedidos-tab" data-bs-toggle="tab" data-bs-target="#pedidos-pane" type="button" role="tab">📦 Seguimiento de Pedidos</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-bold" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios-pane" type="button" role="tab">👤 Clientes Registrados</button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="panelTabsContent">
+    
+    <!-- ========================================================================= -->
+    <!-- PESTAÑA 1: GESTIÓN DE INVENTARIO DE PRODUCTOS                             -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade show active" id="productos-pane" role="tabpanel">
+      <div class="card border-0 shadow-sm rounded-3 p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h5 font-weight-bold m-0 text-dark">Lista General de Productos</h3>
+          <a href="{% url 'crear_producto_empleado' %}" class="btn btn-sm btn-dark">➕ Añadir Nuevo Producto</a>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light small text-uppercase text-secondary">
+              <tr>
+                <th>Imagen</th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th style="width: 120px;">Precio</th>
+                <th style="width: 100px;">Stock</th>
+                <th style="width: 100px;">Desc %</th>
+                <th class="text-center">Destacado</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for prod in productos %}
+              <tr>
+                <td>
+                  {% if prod.imagen %}
+                    <img src="{{ prod.imagen.url }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                  {% else %}
+                    <div class="bg-secondary-subtle rounded text-center" style="width: 50px; height: 50px; line-height: 50px;">🍰</div>
+                  {% endif %}
+                </td>
+                <td><span class="fw-bold text-dark">{{ prod.nombre }}</span></td>
+                
+                <!-- Formulario de actualización en línea -->
+                <form method="POST" action="">
+                  {% csrf_token %}
+                  <input type="hidden" name="producto_id" value="{{ prod.id }}">
+                  <td>
+                    <select name="categoria_id" class="form-select form-select-sm">
+                      {% for cat in categorias %}
+                        <option value="{{ cat.id }}" {% if cat.id == prod.categoria.id %}selected{% endif %}>{{ cat.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td><input type="number" name="precio" class="form-control form-select-sm" value="{{ prod.precio }}" required></td>
+                  <td><input type="number" name="stock" class="form-control form-select-sm" value="{{ prod.stock }}" required></td>
+                  <td><input type="number" name="descuento" class="form-control form-select-sm" value="{{ prod.descuento|default:0 }}"></td>
+                  <td class="text-center">
+                    <input type="checkbox" name="destacado" class="form-check-input" {% if prod.destacado %}checked{% endif %}>
+                  </td>
+                  <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end">
+                      <button type="submit" name="accion" value="actualizar_producto" class="btn btn-sm btn-success" title="Guardar cambios">💾</button>
+                </form>
+                      <form method="POST" action="" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="producto_id" value="{{ prod.id }}">
+                        <button type="submit" name="accion" value="eliminar_producto" class="btn btn-sm btn-danger" title="Borrar">🗑️</button>
+                      </form>
+                    </div>
+                  </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PESTAÑA 2: CONTROL DE PEDIDOS LOGÍSTICO (DIRECCIÓN Y NOMBRES VISIBLES)    -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="pedidos-pane" role="tabpanel">
+      <div class="card border-0 shadow-sm rounded-3 p-4 bg-white">
+        <h3 class="h5 font-weight-bold mb-4 text-dark">📦 Flujo Logístico de Despacho</h3>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light text-secondary small text-uppercase">
+              <tr>
+                <th style="width: 90px;">Pedido</th>
+                <th>Cliente / Contacto</th>
+                <th>Dirección de Entrega</th>
+                <th>Productos Solicitados</th>
+                <th>Total</th>
+                <th>Estado Actual</th>
+                <th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pedido in pedidos %}
+              <tr>
+                <td><strong>#{{ pedido.id }}</strong></td>
+                <td>
+                  <div class="fw-bold text-dark">👤 {{ pedido.nombre }}</div>
+                  <div class="small text-muted">📞 {{ pedido.telefono }}</div>
+                </td>
+                <td>
+                  <div class="text-dark small">📍 {{ pedido.direccion }}</div>
+                  {% if pedido.notas %}
+                    <div class="text-muted small" style="font-size: 0.8rem; font-style: italic;">Nota: {{ pedido.notas }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="small text-muted" style="white-space: pre-line;">{{ pedido.productos }}</div>
+                </td>
+                <td class="fw-bold text-dark">${{ pedido.total }}</td>
+                <td>
+                  {% if pedido.estado == 'pendiente' or pedido.estado == 'en proceso' %}
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">🥣 En proceso</span>
+                  {% elif pedido.estado == 'en envio' %}
+                    <span class="badge bg-info text-dark px-3 py-2 rounded-pill">🚗 En envío</span>
+                  {% elif pedido.estado == 'entregado' %}
+                    <span class="badge bg-success text-white px-3 py-2 rounded-pill">✅ Entregado</span>
+                  {% else %}
+                    <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">{{ pedido.estado }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <form method="POST" action="">
+                    {% csrf_token %}
+                    <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+                    
+                    {% if pedido.estado == 'pendiente' or pedido.estado == 'en proceso' %}
+                      <button type="submit" name="accion" value="cambiar_estado_pedido" class="btn btn-sm btn-outline-info text-dark fw-bold">
+                        Despachar 🚗
+                      </button>
+                    {% elif pedido.estado == 'en envio' %}
+                      <button type="submit" name="accion" value="cambiar_estado_pedido" class="btn btn-sm btn-outline-success fw-bold">
+                        Finalizar ✅
+                      </button>
+                    {% else %}
+                      <button type="submit" name="accion" value="cambiar_estado_pedido" class="btn btn-sm btn-outline-secondary">
+                        Reiniciar 🔄
+                      </button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">No hay pedidos registrados en este momento.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PESTAÑA 3: CRUD COMPLETO DE USUARIOS CLIENTES                             -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="usuarios-pane" role="tabpanel">
+      <div class="card border-0 shadow-sm rounded-3 p-4 bg-white">
+        
+        <!-- Crear Cliente Manualmente -->
+        <div class="bg-light p-4 rounded-3 mb-4">
+          <h4 class="h6 font-weight-bold text-dark mb-3">➕ Registrar Cliente Manualmente</h4>
+          <form method="POST" action="" class="row g-2 align-items-center">
+            {% csrf_token %}
+            <div class="col-md-4">
+              <input type="text" name="username" class="form-control form-control-sm" placeholder="Nombre de usuario" required>
+            </div>
+            <div class="col-md-4">
+              <input type="email" name="email" class="form-control form-control-sm" placeholder="Correo electrónico" required>
+            </div>
+            <div class="col-md-3">
+              <input type="password" name="password" class="form-control form-control-sm" placeholder="Contraseña" required>
+            </div>
+            <div class="col-md-1">
+              <button type="submit" name="accion" value="crear_usuario" class="btn btn-sm btn-dark w-100">Crear</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tabla de Clientes -->
+        <h3 class="h5 font-weight-bold mb-3 text-dark">👥 Lista de Clientes en el Sistema</h3>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light text-secondary small text-uppercase">
+              <tr>
+                <th style="width: 80px;">ID</th>
+                <th>Nombre de Usuario</th>
+                <th>Correo Electrónico</th>
+                <th class="text-end" style="width: 150px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cliente in clientes %}
+              <tr>
+                <td><span class="text-muted small">#{{ cliente.id }}</span></td>
+                <td>
+                  <form method="POST" action="" class="d-flex align-items-center m-0">
+                    {% csrf_token %}
+                    <input type="hidden" name="usuario_id" value="{{ cliente.id }}">
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text bg-white">👤</span>
+                      <input type="text" name="nuevo_username" class="form-control fw-bold text-dark" value="{{ cliente.username }}" required>
+                    </div>
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                      <input type="email" name="nuevo_email" class="form-control text-muted" value="{{ cliente.email|default:'' }}">
+                    </div>
+                </td>
+                <td class="text-end">
+                    <div class="d-flex gap-1 justify-content-end">
+                      <button type="submit" name="accion" value="editar_usuario" class="btn btn-sm btn-success" title="Guardar">💾</button>
+                  </form>
+                      <form method="POST" action="" onsubmit="return confirm('¿Eliminar cliente?');" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="usuario_id" value="{{ cliente.id }}">
+                        <button type="submit" name="accion" value="eliminar_usuario" class="btn btn-sm btn-danger" title="Eliminar">🗑️</button>
+                      </form>
+                    </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4" class="text-center py-4 text-muted">No hay clientes registrados en el sistema.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

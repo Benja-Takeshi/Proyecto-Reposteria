@@ -1,0 +1,96 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Nuestros Productos - Mi Repostería{% endblock %}
+
+{% block content %}
+<div class="page-header py-5 mb-4 text-center">
+  <div class="container py-2">
+    <h1 class="display-4 font-weight-bold text-dark mb-2" style="font-family: 'Georgia', serif;">Nuestros productos</h1>
+    <p class="lead text-muted">Todo preparado artesanalmente con los mejores ingredientes</p>
+  </div>
+</div>
+
+<div class="container text-center mb-5">
+  <div class="d-flex flex-wrap justify-content-center gap-2">
+    <button class="btn btn-outline-secondary px-4 rounded-pill filtro-btn active" type="button" onclick="filtrar('todos', this)">
+      Todos
+    </button>
+    {% for cat in categorias %}
+      <button class="btn btn-outline-secondary px-4 rounded-pill filtro-btn" type="button" onclick="filtrar('{{ cat.nombre|lower }}', this)">
+        {{ cat.nombre }}
+      </button>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="container pb-5">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="grid">
+
+    {% for prod in productos %}
+    <div class="col mb-4 product-item" data-cat="{{ prod.categoria.nombre|lower }}">
+      
+      <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+        
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 240px;">
+          {% if prod.imagen %}
+            <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" class="w-100 h-100" style="object-fit: cover;">
+          {% else %}
+            <span class="display-4">🍰</span>
+          {% endif %}
+        </div>
+        
+        <div class="card-body d-flex flex-column p-4">
+          <div class="mb-2">
+            <span class="badge rounded-pill px-3 py-2 text-uppercase" style="background-color: #f5e6dc; color: #b85a1c; font-size: 0.75rem; font-weight: bold;">
+              {{ prod.categoria.nombre }}
+            </span>
+          </div>
+          
+          <h3 class="card-title h5 font-weight-bold mb-2" style="font-family: 'Georgia', serif; color: #333;">
+            {{ prod.nombre }}
+          </h3>
+          
+          <p class="card-text text-muted flex-grow-1 mb-3" style="font-size: 0.95rem; line-height: 1.5;">
+            {{ prod.descripcion }}
+          </p>
+          
+          <p class="text-secondary small mb-3">
+            Disponibles: <strong class="text-dark">{{ prod.stock }}</strong> u.
+          </p>
+          
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #f9f4f0 !important;">
+            <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
+              ${{ prod.precio }}
+            </span>
+            
+            <button class="btn btn-agregar text-white font-weight-bold px-4" 
+                data-nombre="{{ prod.nombre|escapejs }}" 
+                data-precio="{{ prod.precio }}"
+                data-imagen="{% if prod.imagen %}{{ prod.imagen.url }}{% endif %}"
+                onclick="agregar(this.dataset.nombre, Number(this.dataset.precio), this, this.dataset.imagen)"
+                style="background-color: #b85a1c; border-radius: 8px; border: none; padding-top: 8px; padding-bottom: 8px;">
+                Agregar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <div class="alert alert-warning d-inline-block px-5" role="alert" style="border-radius: 12px;">
+        😕 Aún no hay productos subidos en el sistema.
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="col-12 text-center py-5" id="sin-resultados" style="display: none;">
+      <div class="alert alert-light d-inline-block px-5 border shadow-sm" role="alert" style="border-radius: 12px;">
+        😕 No hay productos en esta categoría todavía.
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

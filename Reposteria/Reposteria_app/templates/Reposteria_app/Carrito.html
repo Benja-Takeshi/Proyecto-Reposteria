@@ -1,0 +1,81 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Carrito — Mi Repostería{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'Reposteria_app/styles.css' %}">
+
+<section class="carrito-page">
+
+  <!-- IZQUIERDA: productos -->
+  <div class="carrito-lista">
+    <h2>Tu carrito</h2>
+
+    <div id="carrito-vacio-msg" class="carrito-page-vacio" style="display:none;">
+      <p>Tu carrito está vacío</p>
+      <a href="{% url 'productos' %}" class="btn-ir-productos">Ver productos</a>
+    </div>
+
+    <div id="carrito-lista-items"></div>
+  </div>
+
+  <!-- DERECHA: resumen + formulario -->
+  <div class="carrito-resumen">
+    <h2>Resumen del pedido</h2>
+
+    <div class="resumen-box">
+      <div id="resumen-items-page"></div>
+      <div class="resumen-separador"></div>
+      <div class="resumen-total-page">
+        <span>Total</span>
+        <span id="resumen-total-page">$0</span>
+      </div>
+    </div>
+
+    <div class="formulario-pedido" id="formulario-pedido">
+      <h3>Datos de entrega</h3>
+
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Ej: María González" />
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="telefono" placeholder="+56 9 1234 5678" />
+      </div>
+      <div class="form-group">
+        <label>Dirección de entrega</label>
+        <input type="text" id="direccion" placeholder="Calle, número, ciudad" />
+      </div>
+      <div class="form-group">
+        <label>Notas (opcional)</label>
+        <textarea id="notas" placeholder="Ej: sin nueces, para el 15 de julio..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Método de pago</label>
+        <div class="pago-opciones">
+          <div class="pago-opcion seleccionado" id="pago-transferencia" onclick="seleccionarPago('transferencia')">
+            Transferencia
+          </div>
+          <div class="pago-opcion" id="pago-efectivo" onclick="seleccionarPago('efectivo')">
+            Efectivo
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-confirmar" id="btn-confirmar-pedido" type="button" onclick="confirmarPedido()">
+        Confirmar pedido
+      </button>
+    </div>
+
+    <div class="confirmacion" id="confirmacion-box" style="display:none;">
+      <h2>Pedido confirmado</h2>
+      <p id="confirmacion-texto"></p>
+      <a href="{% url 'productos' %}" class="btn-ir-productos">Seguir comprando</a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

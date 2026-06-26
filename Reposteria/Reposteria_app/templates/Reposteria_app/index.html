@@ -1,0 +1,79 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Mi Repostería{% endblock %}
+
+{% block content %}
+<div class="page-header py-5 mb-5 text-center">
+  <div class="container py-3">
+    <h1 class="display-4 font-weight-bold text-dark mb-3" style="font-family: 'Georgia', serif;">
+      ✨ Favoritos de la Casa ✨
+    </h1>
+    <p class="lead text-muted font-italic">
+      Nuestros productos más seleccionados directamente para ti
+    </p>
+  </div>
+</div>
+
+<section class="container pb-5">
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="grid">
+    
+    {% for prod in productos_destacados %}
+    <div class="col mb-4" data-cat="{{ prod.categoria.nombre|lower }}">
+      
+      <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+        
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+          {% if prod.imagen %}
+            <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}" class="w-100 h-100" style="object-fit: cover;">
+          {% else %}
+            <span class="display-3">🍰</span>
+          {% endif %}
+        </div>
+        
+        <div class="card-body d-flex flex-column p-4">
+          <div class="mb-2">
+            <span class="badge badge-pill p-2 px-3 text-uppercase" style="background-color: #f5e6dc; color: #b85a1c; font-size: 0.8rem;">
+              {{ prod.categoria.nombre }}
+            </span>
+          </div>
+          
+          <h3 class="card-title h5 font-weight-bold" style="font-family: 'Georgia', serif; color: #333;">
+            {{ prod.nombre }}
+          </h3>
+          
+          <p class="card-text text-muted flex-grow-1" style="font-size: 0.95rem; line-height: 1.5;">
+            {{ prod.descripcion }}
+          </p>
+          
+          <p class="text-secondary small mb-3">
+            Disponibles: <strong class="text-dark">{{ prod.stock }}</strong> u.
+          </p>
+          
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #f9f4f0 !important;">
+            <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
+              ${{ prod.precio }}
+            </span>
+            
+            <button class="btn btn-agregar text-white font-weight-bold px-4" 
+                data-nombre="{{ prod.nombre|escapejs }}" 
+                data-precio="{{ prod.precio }}"
+                data-imagen="{% if prod.imagen %}{{ prod.imagen.url }}{% endif %}"
+                onclick="agregar(this.dataset.nombre, Number(this.dataset.precio), this, this.dataset.imagen)"
+                style="background-color: #b85a1c; border-radius: 8px; border: none;">
+                Agregar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <p class="lead text-muted">Pronto tendremos sorpresas destacadas en nuestra portada. ¡Atento! 🎂</p>
+    </div>
+    {% endfor %}
+
+  </div>
+</section>
+{% endblock %}

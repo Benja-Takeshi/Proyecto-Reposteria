@@ -1,0 +1,49 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}Crear Cuenta - Mi Repostería{% endblock %}
+
+{% block content %}
+<div style="max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f2e6df;">
+    
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h2 style="font-family: 'Georgia', serif; color: #b85a1c; margin-bottom: 5px;">Crear Cuenta 🍰</h2>
+        <p style="color: #777; font-size: 0.9rem;">Regístrate para poder realizar tus pedidos.</p>
+    </div>
+
+    {% if form.errors %}
+        <div style="padding: 10px; background-color: #fce4d6; color: #c0392b; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem;">
+            Por favor, corrige los errores señalados abajo.
+        </div>
+    {% endif %}
+
+    <form method="POST" class="form-registro">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="campo-contenedor">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                
+                {% if field.help_text %}
+                    <small class="texto-ayuda">{{ field.help_text }}</small>
+                {% endif %}
+                
+                {% for error in field.errors %}
+                    <small class="texto-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn-navbar-carrito" style="width: 100%; justify-content: center; margin-top: 15px; padding: 12px;">
+            Registrarse 🧁
+        </button>
+    </form>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+
+    <p style="text-align: center; color: #555; font-size: 0.95rem; margin: 0;">
+        ¿Ya tienes cuenta? <a href="{% url 'login' %}" style="color: #b85a1c; font-weight: bold; text-decoration: none;">Inicia sesión aquí</a>
+    </p>
+</div>
+{% endblock %}

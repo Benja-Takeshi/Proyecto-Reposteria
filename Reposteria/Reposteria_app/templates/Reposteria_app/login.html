@@ -1,0 +1,33 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_tags %} {% block title %}Iniciar Sesión - Mi Repostería{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 50px auto; padding: 28px; border-radius: 14px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1px solid #f2e6df;">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-family: 'Georgia', serif; color: #b85a1c; margin-bottom: 6px; font-size: 1.5rem;">Iniciar sesión</h2>
+        <p style="color: #7a5a3a; font-size: 0.95rem; margin: 0;">Ingresa tus datos para continuar.</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 10px 12px; background-color: #fdf0e8; color: #b85a1c; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; text-align: center;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn-navbar-carrito" style="width: 100%; justify-content: center; margin-top: 6px; padding: 11px 12px;">
+            Entrar
+        </button>
+    </form>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0 14px;">
+
+    <p style="text-align: center; color: #6b5b4f; font-size: 0.92rem; margin: 0;">
+        ¿No tienes cuenta? <a href="{% url 'registro' %}" style="color: #b85a1c; font-weight: 600; text-decoration: none;">Regístrate</a>
+    </p>
+</div>
+{% endblock %}
