@@ -1,9 +1,8 @@
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
@@ -11,21 +10,26 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Producto, Categoria, Pedido
 
 def inicio(request):
-    # Buscamos solo los productos que marcamos como destacados para el index
-    productos_destacados = Producto.objects.filter(destacado=True, disponible=True)[:4] # El [:4] limita a máximo 4 productos para que no se desarme el diseño
-    
+    productos_destacados = Producto.objects.filter(destacado=True, disponible=True)[:4]
+    for prod in productos_destacados:
+        if prod.descuento and prod.descuento > 0:
+            prod.precio_rebajado = int(prod.precio * (100 - prod.descuento) / 100)
+        else:
+            prod.precio_rebajado = prod.precio
     contexto = {
         'productos_destacados': productos_destacados
     }
     return render(request, 'Reposteria_app/index.html', contexto)
 
 def productos(request):
-    # 1. Buscamos solo los productos marcados como disponibles en el admin
     lista_productos = Producto.objects.filter(disponible=True)
-    # 2. Traemos todas las categorías creadas en el admin
     lista_categorias = Categoria.objects.all()
+    for prod in lista_productos:
+        if prod.descuento and prod.descuento > 0:
+            prod.precio_rebajado = int(prod.precio * (100 - prod.descuento) / 100)
+        else:
+            prod.precio_rebajado = prod.precio
     
-    # 3. Se los pasamos al HTML
     contexto = {
         'productos': lista_productos,
         'categorias': lista_categorias,
@@ -35,7 +39,6 @@ def productos(request):
 @login_required
 def procesar_compra(request):
     if request.method == 'POST':
-        # Tu código actual que guarda el pedido en la base de datos...
         return JsonResponse({'status': 'ok', 'message': 'Pedido guardado'})
 
 @csrf_exempt
@@ -84,13 +87,12 @@ def guardar_pedido(request):
 
     return JsonResponse({'ok': False, 'error': 'Método no permitido'})
 
-# VISTA DE REGISTRO
 def registro_usuario(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user) # Inicia sesión automáticamente al registrarse
+            login(request, user)
             messages.success(request, f"¡Bienvenido/a, {user.username}! Cuenta creada con éxito.")
             return redirect('inicio')
         else:
@@ -99,7 +101,6 @@ def registro_usuario(request):
         form = UserCreationForm()
     return render(request, 'Reposteria_app/registro.html', {'form': form})
 
-# VISTA DE LOGIN
 def login_usuario(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -109,6 +110,8 @@ def login_usuario(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                if user.is_staff or user.is_superuser:
+                    return redirect('panel_empleados')
                 return redirect('inicio')
 
         messages.error(request, 'Usuario o contraseña incorrectos.')
@@ -117,7 +120,6 @@ def login_usuario(request):
 
     return render(request, 'Reposteria_app/login.html', {'form': form})
 
-# VISTA DE LOGOUT (CERRAR SESIÓN)
 def logout_usuario(request):
     logout(request)
     return redirect('inicio')
@@ -125,8 +127,15 @@ def logout_usuario(request):
 def carrito(request):
     return render(request, 'Reposteria_app/carrito.html')
 
-@staff_member_required
+
+# === VISTAS DEL PANEL CON PROTECCIÓN MANUAL PARA STAFF Y ADMINS ===
+
+@login_required
 def panel_empleados(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "No tienes permisos para acceder a esta sección.")
+        return redirect('inicio')
+
     if request.method == 'POST':
         accion = request.POST.get('accion')
         
@@ -136,30 +145,37 @@ def panel_empleados(request):
             producto = Producto.objects.get(id=prod_id)
             producto.precio = request.POST.get('precio')
             producto.stock = request.POST.get('stock')
-            producto.descuento = request.POST.get('descuento')
-            producto.destacado = request.POST.get('destacado') == 'on'  # Corregido: 'destacaged' -> 'destacado'
-            # Guardamos la categoría editada
+            
+            desc_valor = request.POST.get('descuento')
+            producto.descuento = int(desc_valor) if desc_valor and desc_valor.strip() else 0
+            
+            # Recibe el checkbox correctamente del nuevo formulario
+            producto.destacado = request.POST.get('destacado') == 'on'
+            
             cat_id = request.POST.get('categoria_id')
             producto.categoria = Categoria.objects.get(id=cat_id)
             producto.save()
+            messages.success(request, f"Producto '{producto.nombre}' actualizado.")
             
         elif accion == 'eliminar_producto':
-            Producto.objects.get(id=request.POST.get('producto_id')).delete()
+            prod_id = request.POST.get('producto_id')
+            Producto.objects.get(id=prod_id).delete()
+            messages.success(request, "Producto eliminado correctamente.")
 
-        # 2. GESTIÓN DE PEDIDOS (Con ciclo logístico de 3 estados)
+        # 2. GESTIÓN DE PEDIDOS
         elif accion == 'cambiar_estado_pedido':
             pedido_id = request.POST.get('pedido_id')
             pedido = Pedido.objects.get(id=pedido_id)
             
-            # Control secuencial del estado del despacho
             if pedido.estado == 'pendiente' or pedido.estado == 'en proceso':
                 pedido.estado = 'en envio'
             elif pedido.estado == 'en envio':
                 pedido.estado = 'entregado'
             else:
-                pedido.estado = 'en proceso' # Reinicia el ciclo en caso de error
+                pedido.estado = 'en proceso'
                 
             pedido.save()
+            messages.success(request, f"Estado del pedido #{pedido.id} modificado.")
 
         # 3. CRUD DE USUARIOS CLIENTES
         elif accion == 'crear_usuario':
@@ -168,39 +184,86 @@ def panel_empleados(request):
                 email=request.POST.get('email'),
                 password=request.POST.get('password')
             )
+            messages.success(request, "Usuario creado exitosamente.")
+            
         elif accion == 'editar_usuario':
             user_id = request.POST.get('usuario_id')
             u = User.objects.get(id=user_id)
             u.username = request.POST.get('nuevo_username')
             u.email = request.POST.get('nuevo_email')
             u.save()
+            messages.success(request, "Usuario actualizado.")
+            
         elif accion == 'eliminar_usuario':
-            User.objects.get(id=request.POST.get('usuario_id')).delete()
+            user_id = request.POST.get('usuario_id')
+            u = User.objects.get(id=user_id)
+            
+            if u.is_superuser:
+                messages.error(request, "No tienes permisos para eliminar a un Administrador del sistema.")
+            else:
+                u.delete()
+                messages.success(request, "Usuario eliminado con éxito.")
 
         return redirect('panel_empleados')
 
-    # Datos finales para inyectar en las tablas
-    return render(request, 'Reposteria_app/panel_empleados.html', {
+    context = {
         'productos': Producto.objects.all(),
         'categorias': Categoria.objects.all(),
-        'pedidos': Pedido.objects.all().order_by('-id'),
-        'clientes': User.objects.filter(is_staff=False, is_superuser=False)
-    })
+        'pedidos': Pedido.objects.all().distinct().order_by('-id'),
+        'clientes': User.objects.all().order_by('-is_superuser', '-is_staff', 'username')
+    }
+    return render(request, 'Reposteria_app/panel_empleados.html', context)
 
-@staff_member_required
+
+@login_required
 def crear_producto_empleado(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('inicio')
+
     if request.method == 'POST':
         nombre = request.POST.get('nombre')
         precio = request.POST.get('precio')
         descripcion = request.POST.get('descripcion')
-        imagen = request.FILES.get('imagen') # Ojo: FILES para las fotos
+        imagen = request.FILES.get('imagen')
+        stock = request.POST.get('stock', 0)
+        cat_id = request.POST.get('categoria_id')
+        categoria = Categoria.objects.get(id=cat_id) if cat_id else None
         
         Producto.objects.create(
             nombre=nombre,
             precio=precio,
             descripcion=descripcion,
-            imagen=imagen
+            imagen=imagen,
+            stock=stock,
+            categoria=categoria
         )
+        messages.success(request, "¡Producto creado con éxito!")
+        
+    return redirect('panel_empleados')
+
+
+@login_required
+def eliminar_pedido(request, pedido_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('inicio')
+
+    if request.method == 'POST':
+        pedido = get_object_or_404(Pedido, id=pedido_id)
+        pedido.delete()
+        messages.success(request, "Pedido eliminado.")
+    return redirect('panel_empleados')
+
+
+def eliminar_usuario_panel(request, usuario_id):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('inicio')
+        
+    usuario_a_borrar = get_object_or_404(User, id=usuario_id)
+    
+    if usuario_a_borrar.is_superuser:
+        messages.error(request, "No tienes permisos para eliminar a un Administrador del sistema.")
         return redirect('panel_empleados')
         
-    return render(request, 'Reposteria_app/crear_producto.html')
+    usuario_a_borrar.delete()
+    messages.success(request, f"Usuario {usuario_a_borrar.username} eliminado correctamente.")
+    return redirect('panel_empleados')

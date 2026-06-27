@@ -8,7 +8,6 @@
 
 <section class="carrito-page">
 
-  <!-- IZQUIERDA: productos -->
   <div class="carrito-lista">
     <h2>Tu carrito</h2>
 
@@ -20,7 +19,6 @@
     <div id="carrito-lista-items"></div>
   </div>
 
-  <!-- DERECHA: resumen + formulario -->
   <div class="carrito-resumen">
     <h2>Resumen del pedido</h2>
 
@@ -65,16 +63,13 @@
         </div>
       </div>
 
-      <button class="btn-confirmar" id="btn-confirmar-pedido" type="button" onclick="confirmarPedido()">
-        Confirmar pedido
+      {% csrf_token %}
+      <button type="button" id="btn-confirmar-pedido" class="btn text-white w-100 py-3" style="background-color: #b85a1c; border-radius: 50px; font-weight: bold; font-size: 1.1rem;">
+        Confirmar Compra
       </button>
     </div>
 
-    <div class="confirmacion" id="confirmacion-box" style="display:none;">
-      <h2>Pedido confirmado</h2>
-      <p id="confirmacion-texto"></p>
-      <a href="{% url 'productos' %}" class="btn-ir-productos">Seguir comprando</a>
-    </div>
+    <div class="confirmacion" id="confirmacion-box" style="display:none;"></div>
 
   </div>
 </section>

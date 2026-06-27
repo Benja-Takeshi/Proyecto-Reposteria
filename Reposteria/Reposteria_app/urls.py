@@ -11,4 +11,5 @@ urlpatterns = [
     path('carrito/', views.carrito, name='carrito'),
     path('panel-empleados/', views.panel_empleados, name='panel_empleados'),
     path('panel-empleados/nuevo/', views.crear_producto_empleado, name='crear_producto_empleado'),
+    path('panel-empleados/eliminar/<int:pedido_id>/', views.eliminar_pedido, name='eliminar_pedido'),
 ]

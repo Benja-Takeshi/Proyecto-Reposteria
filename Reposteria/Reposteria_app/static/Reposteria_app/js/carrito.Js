@@ -28,23 +28,47 @@ function cerrarCarrito() {
 }
 
 function manejarClickCarrito(urlCarrito) {
-  // Siempre redirige a la página del carrito
   location.href = urlCarrito;
 }
 
-// ── AGREGAR / MODIFICAR ─────────────────────────────────────────────────────
-function agregar(nombre, precio, btn, imagen = '') {
+// ── AGREGAR CON CONTROL DE STOCK REAL EN TIENDA ─────────────────────────────
+function agregarConStock(idProducto, nombre, precio, btn, imagen = '') {
   if (!esAutenticado()) {
     if (confirm('Para agregar productos necesitas iniciar sesión. ¿Quieres ir al login?'))
       window.location.href = '/login/';
     return;
   }
 
+  const stockEl = document.getElementById(`stock-val-${idProducto}`);
   const existe = carrito.find(p => p.nombre === nombre);
-  if (existe) existe.cantidad++;
-  else carrito.push({ nombre, precio, cantidad: 1, imagen });
+
+  // Si la etiqueta existe en pantalla, calculamos basándonos en el DOM
+  if (stockEl) {
+    let stockActualHTML = parseInt(stockEl.textContent) || 0;
+
+    if (stockActualHTML <= 0) {
+      alert(`⚠️ Lo sentimos, "${nombre}" se encuentra temporalmente agotado.`);
+      return;
+    }
+
+    const stockOriginalTotal = stockActualHTML + (existe ? existe.cantidad : 0);
+
+    if (existe) {
+      existe.cantidad++;
+    } else {
+      carrito.push({ nombre, precio, cantidad: 1, imagen, stockMaximo: stockOriginalTotal });
+    }
+
+    // Restamos 1 al stock visual en la tarjeta
+    stockEl.textContent = stockActualHTML - 1;
+  } else {
+    // Caída segura si se ejecuta desde una vista sin el tag de stock
+    agregar(nombre, precio, btn, imagen);
+    return;
+  }
 
   guardarCarrito();
+  actualizarContadorNavbar();
   actualizarCarrito();
 
   if (btn) {
@@ -54,9 +78,43 @@ function agregar(nombre, precio, btn, imagen = '') {
   }
 }
 
+// Método fallback clásico
+function agregar(nombre, precio, btn, imagen = '', stockMaximo = 999) {
+  if (!esAutenticado()) {
+    if (confirm('Para agregar productos necesitas iniciar sesión. ¿Quieres ir al login?'))
+      window.location.href = '/login/';
+    return;
+  }
+
+  const existe = carrito.find(p => p.nombre === nombre);
+  if (existe) {
+    if (existe.cantidad >= stockMaximo) {
+      alert(`⚠️ Lo sentimos, no queda más stock disponible de "${nombre}".`);
+      return;
+    }
+    existe.cantidad++;
+  } else {
+    if (stockMaximo <= 0) {
+      alert(`⚠️ Lo sentimos, "${nombre}" se encuentra agotado.`);
+      return;
+    }
+    carrito.push({ nombre, precio, cantidad: 1, imagen, stockMaximo });
+  }
+
+  guardarCarrito();
+  actualizarCarrito();
+}
+
 function cambiarCantidad(nombre, delta) {
   const item = carrito.find(p => p.nombre === nombre);
   if (!item) return;
+
+  // Validación de stock máximo al sumar desde el panel lateral
+  if (delta > 0 && item.stockMaximo !== undefined && item.cantidad >= item.stockMaximo) {
+    alert(`⚠️ Límite alcanzado. No hay más stock disponible de este producto (${item.stockMaximo} u.).`);
+    return;
+  }
+
   item.cantidad += delta;
   if (item.cantidad <= 0) carrito = carrito.filter(p => p.nombre !== nombre);
   guardarCarrito();
@@ -83,7 +141,6 @@ function actualizarCarrito() {
   if (el('carrito-count')) el('carrito-count').textContent = count;
   if (el('carrito-total')) el('carrito-total').textContent = '$' + total.toLocaleString('es-CL');
 
-  // Panel flotante (productos.html)
   const container = el('carrito-items');
   if (container) {
     container.innerHTML = carrito.length === 0
@@ -102,7 +159,6 @@ function actualizarCarrito() {
           </div>`).join('');
   }
 
-  // Página carrito (carrito.html)
   if (el('carrito-lista-items')) renderizarListaCarrito();
 }
 
@@ -160,7 +216,7 @@ async function confirmarPedido() {
   const nombre    = val('nombre');
   const telefono  = val('telefono');
   const direccion = val('direccion');
-  const notas     = val('notas');
+  const notas     = val('notes') || val('notas');
 
   if (!nombre || !telefono || !direccion) {
     alert('Por favor completa nombre, teléfono y dirección.');
@@ -169,35 +225,41 @@ async function confirmarPedido() {
 
   const total = carrito.reduce((s, p) => s + p.precio * p.cantidad, 0);
   const btn = document.getElementById('btn-confirmar-pedido') || document.getElementById('btn-confirmar');
-  if (btn) { btn.textContent = 'Enviando...'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ Procesando compra... No cierre la página'; btn.disabled = true; }
+
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
   try {
-    const res  = await fetch('/guardar-pedido/', {
+    const res = await fetch('/guardar-pedido/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      headers: { 
+        'Content-Type': 'application/json', 
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken
+      },
       body: JSON.stringify({ nombre, telefono, direccion, notas, productos: carrito, total, pago: pagoSeleccionado })
     });
     const data = await res.json();
 
     if (data.ok) {
-      // Mostrar confirmación según si estamos en modal o página separada
-      const contenedor = document.getElementById('modal-contenido') || document.getElementById('confirmacion-box');
+      const contenedor = document.getElementById('confirmacion-box') || document.getElementById('modal-contenido');
       if (contenedor) {
         contenedor.style.display = 'block';
         contenedor.innerHTML = `
-          <div class="confirmacion">
-            <h2>Pedido confirmado</h2>
-            <p>Gracias <strong>${nombre}</strong>, tu pedido fue registrado.</p>
-            <div class="detalle-confirmacion">
-              <p><strong>Telefono:</strong> ${telefono}</p>
-              <p><strong>Direccion:</strong> ${direccion}</p>
-              <p><strong>Pago:</strong> ${pagoSeleccionado === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo'}</p>
+          <div class="confirmacion text-center p-3">
+            <h2>Pedido confirmado 🎉</h2>
+            <p>Gracias <strong>${nombre}</strong>, tu pedido fue registrado correctamente.</p>
+            <div class="detalle-confirmacion my-3 p-3 bg-light rounded text-start" style="font-size:0.95rem; color:#555;">
+              <p class="m-1"><strong>Código de pedido:</strong> #${data.pedido_id}</p>
+              <p class="m-1"><strong>Teléfono:</strong> ${telefono}</p>
+              <p class="m-1"><strong>Dirección:</strong> ${direccion}</p>
+              <p class="m-1"><strong>Pago:</strong> ${pagoSeleccionado === 'transferencia' ? 'Transferencia bancaria' : 'Efectivo'}</p>
             </div>
-            <p>Te contactaremos pronto para confirmar la entrega.</p>
-            <button class="btn-volver" onclick="location.reload()">Volver a la tienda</button>
+            <p class="small text-muted">Te contactaremos pronto para coordinar la entrega.</p>
+            <button class="btn btn-sm text-white mt-2 px-4" style="background-color: #b85a1c; border-radius:50px;" onclick="location.reload()">Volver a la tienda</button>
           </div>`;
       }
-      // Ocultar formulario si estamos en la página carrito
+      
       const form = document.getElementById('formulario-pedido');
       if (form) form.style.display = 'none';
 
@@ -205,12 +267,13 @@ async function confirmarPedido() {
       localStorage.removeItem('carrito');
       actualizarCarrito();
     } else {
-      alert('Hubo un error al enviar el pedido. Intenta de nuevo.');
-      if (btn) { btn.textContent = 'Confirmar pedido'; btn.disabled = false; }
+      alert('Hubo un error al enviar el pedido: ' + (data.error || 'Intenta de nuevo.'));
+      if (btn) { btn.textContent = 'Confirmar Compra'; btn.disabled = false; }
     }
-  } catch {
+  } catch (error) {
+    console.error(error);
     alert('Error de conexión. Intenta de nuevo.');
-    if (btn) { btn.textContent = 'Confirmar pedido'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'Confirmar Compra'; btn.disabled = false; }
   }
 }
 
@@ -271,7 +334,16 @@ function actualizarResumenPage() {
   if (totalEl) totalEl.textContent = '$' + total.toLocaleString('es-CL');
 }
 
+// Validación de stock máximo al sumar desde la vista final del carrito
 function cambiarCantidadPage(nombre, delta) {
+  const item = carrito.find(p => p.nombre === nombre);
+  if (!item) return;
+
+  if (delta > 0 && item.stockMaximo !== undefined && item.cantidad >= item.stockMaximo) {
+    alert(`⚠️ Límite alcanzado. No puedes agregar más unidades, stock máximo: ${item.stockMaximo} u.`);
+    return;
+  }
+
   cambiarCantidad(nombre, delta);
   renderizarListaCarrito();
 }
@@ -289,8 +361,46 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── SCOPE GLOBAL ────────────────────────────────────────────────────────────
 Object.assign(window, {
   agregar, cambiarCantidad, eliminarItem,
+  agregarConStock,
   abrirCarrito, cerrarCarrito, manejarClickCarrito,
   abrirFormulario, cerrarFormulario,
   seleccionarPago, confirmarPedido, filtrar,
   cambiarCantidadPage, renderizarListaCarrito,
 });
+
+function eliminarPedidoAjax(event, url, pedidoId) {
+    event.preventDefault();
+
+    if (!confirm('¿Seguro que deseas eliminar este pedido permanentemente?')) {
+        return;
+    }
+
+    const csrfToken = event.target.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const fila = document.getElementById(`fila-pedido-${pedidoId}`);
+            if (fila) {
+                fila.style.transition = 'all 0.4s ease';
+                fila.style.opacity = '0';
+                fila.style.backgroundColor = '#f8d7da';
+                
+                setTimeout(() => { fila.remove(); }, 400);
+            }
+        } else {
+            alert('Hubo un error al intentar eliminar el pedido.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('No se pudo conectar con el servidor.');
+    });
+}

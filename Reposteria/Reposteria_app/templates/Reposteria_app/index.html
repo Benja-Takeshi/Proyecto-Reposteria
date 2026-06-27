@@ -6,11 +6,12 @@
 {% block content %}
 <div class="page-header py-5 mb-5 text-center">
   <div class="container py-3">
+    <img src="{% static 'Reposteria_app/img/logo.png' %}" alt="Logo Sabrosuraspp" width="220" height="220" class="img-fluid mb-3" style="object-fit: contain;">
     <h1 class="display-4 font-weight-bold text-dark mb-3" style="font-family: 'Georgia', serif;">
-      ✨ Favoritos de la Casa ✨
+      Productos Destacados
     </h1>
     <p class="lead text-muted font-italic">
-      Nuestros productos más seleccionados directamente para ti
+      Productos seleccionados especialmente para ti. ¡Descubre nuestras delicias y endulza tu feliz vida!
     </p>
   </div>
 </div>
@@ -51,13 +52,28 @@
           </p>
           
           <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #f9f4f0 !important;">
-            <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
-              ${{ prod.precio }}
-            </span>
+            
+            <div class="d-flex flex-column">
+              {% if prod.descuento > 0 %}
+                <div>
+                  <span class="h4 font-weight-bold mb-0 text-danger">
+                    ${{ prod.precio_rebajado }}
+                  </span>
+                  <span class="badge bg-success small ms-1" style="font-size: 0.75rem;">{{ prod.descuento }}% OFF</span>
+                </div>
+                <span class="text-muted text-decoration-line-through small">
+                  ${{ prod.precio }}
+                </span>
+              {% else %}
+                <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
+                  ${{ prod.precio }}
+                </span>
+              {% endif %}
+            </div>
             
             <button class="btn btn-agregar text-white font-weight-bold px-4" 
                 data-nombre="{{ prod.nombre|escapejs }}" 
-                data-precio="{{ prod.precio }}"
+                data-precio="{% if prod.descuento > 0 %}{{ prod.precio_rebajado }}{% else %}{{ prod.precio }}{% endif %}"
                 data-imagen="{% if prod.imagen %}{{ prod.imagen.url }}{% endif %}"
                 onclick="agregar(this.dataset.nombre, Number(this.dataset.precio), this, this.dataset.imagen)"
                 style="background-color: #b85a1c; border-radius: 8px; border: none;">

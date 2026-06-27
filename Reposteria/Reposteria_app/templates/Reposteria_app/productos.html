@@ -56,19 +56,35 @@
           </p>
           
           <p class="text-secondary small mb-3">
-            Disponibles: <strong class="text-dark">{{ prod.stock }}</strong> u.
+            Disponibles: <strong class="text-dark" id="stock-val-{{ prod.id }}">{{ prod.stock }}</strong> u.
           </p>
           
           <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: #f9f4f0 !important;">
-            <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
-              ${{ prod.precio }}
-            </span>
+            
+            <div class="d-flex flex-column">
+              {% if prod.descuento > 0 %}
+                <div>
+                  <span class="h4 font-weight-bold mb-0 text-danger">
+                    ${{ prod.precio_rebajado }}
+                  </span>
+                  <span class="badge bg-success small ms-1" style="font-size: 0.75rem;">{{ prod.descuento }}% OFF</span>
+                </div>
+                <span class="text-muted text-decoration-line-through small">
+                  ${{ prod.precio }}
+                </span>
+              {% else %}
+                <span class="h4 font-weight-bold mb-0" style="color: #b85a1c;">
+                  ${{ prod.precio }}
+                </span>
+              {% endif %}
+            </div>
             
             <button class="btn btn-agregar text-white font-weight-bold px-4" 
+                data-id="{{ prod.id }}"
                 data-nombre="{{ prod.nombre|escapejs }}" 
-                data-precio="{{ prod.precio }}"
+                data-precio="{% if prod.descuento > 0 %}{{ prod.precio_rebajado }}{% else %}{{ prod.precio }}{% endif %}"
                 data-imagen="{% if prod.imagen %}{{ prod.imagen.url }}{% endif %}"
-                onclick="agregar(this.dataset.nombre, Number(this.dataset.precio), this, this.dataset.imagen)"
+                onclick="agregarConStock(this.dataset.id, this.dataset.nombre, Number(this.dataset.precio), this, this.dataset.imagen)"
                 style="background-color: #b85a1c; border-radius: 8px; border: none; padding-top: 8px; padding-bottom: 8px;">
                 Agregar
             </button>
