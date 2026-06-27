@@ -4,24 +4,30 @@
 {% block title %}Carrito — Mi Repostería{% endblock %}
 
 {% block content %}
+{# CSS de la página #}
 <link rel="stylesheet" href="{% static 'Reposteria_app/styles.css' %}">
 
 <section class="carrito-page">
 
+  {# ── IZQUIERDA: lista de productos ── #}
   <div class="carrito-lista">
     <h2>Tu carrito</h2>
 
+    {# Mensaje visible cuando el carrito está vacío #}
     <div id="carrito-vacio-msg" class="carrito-page-vacio" style="display:none;">
       <p>Tu carrito está vacío</p>
       <a href="{% url 'productos' %}" class="btn-ir-productos">Ver productos</a>
     </div>
 
+    {# Contenedor donde el JS renderiza los items #}
     <div id="carrito-lista-items"></div>
   </div>
 
+  {# ── DERECHA: resumen y formulario ── #}
   <div class="carrito-resumen">
     <h2>Resumen del pedido</h2>
 
+    {# Resumen de productos y total #}
     <div class="resumen-box">
       <div id="resumen-items-page"></div>
       <div class="resumen-separador"></div>
@@ -31,6 +37,7 @@
       </div>
     </div>
 
+    {# Formulario de datos de entrega #}
     <div class="formulario-pedido" id="formulario-pedido">
       <h3>Datos de entrega</h3>
 
@@ -51,6 +58,7 @@
         <textarea id="notas" placeholder="Ej: sin nueces, para el 15 de julio..."></textarea>
       </div>
 
+      {# Selector de método de pago #}
       <div class="form-group">
         <label>Método de pago</label>
         <div class="pago-opciones">
@@ -64,11 +72,13 @@
       </div>
 
       {% csrf_token %}
+      {# Botón confirmar — el JS maneja el click mediante id #}
       <button type="button" id="btn-confirmar-pedido" class="btn text-white w-100 py-3" style="background-color: #b85a1c; border-radius: 50px; font-weight: bold; font-size: 1.1rem;">
         Confirmar Compra
       </button>
     </div>
 
+    {# Contenedor donde el JS muestra la confirmación tras el pedido #}
     <div class="confirmacion" id="confirmacion-box" style="display:none;"></div>
 
   </div>

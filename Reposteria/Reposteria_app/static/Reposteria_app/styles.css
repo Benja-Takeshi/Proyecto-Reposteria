@@ -1,6 +1,4 @@
-/* ==========================================================================
-   1. VARIABLES Y CONFIGURACIÓN BASE (:root, reset)
-   ========================================================================== */
+/* Variables y reset */
 :root {
   --color-primary: #b85a1c;
   --color-primary-light: #fbeee6;
@@ -9,12 +7,10 @@
   --color-muted: #7a5a3a;
   --color-bg: #fff8f2;
   --color-white: #fff;
-  
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  
   --radius-pill: 999px;
-  --radius-md: 12px; /* Declarada para evitar inconsistencias en .card */
+  --radius-md: 12px;
   --transition: 0.2s ease;
 }
 
@@ -35,11 +31,7 @@ body {
 }
 
 
-/* ==========================================================================
-   2. COMPONENTES GLOBALES (Botones, Formularios, Utilidades)
-   ========================================================================== */
-
-/* --- Botones Base --- */
+/* Botones — base compartida */
 .btn-navbar-carrito, 
 .btn-pedir, 
 .btn-agregar, 
@@ -69,7 +61,7 @@ body {
   background: var(--color-primary-dark);
 }
 
-/* --- Variantes de Botones --- */
+/* Botones — variantes de tamaño y estilo */
 .btn-navbar-carrito, 
 .btn-pedir, 
 .btn-agregar {
@@ -94,6 +86,7 @@ body {
   background-color: #9c4a14 !important;
 }
 
+/* Botón eliminar — icono sin fondo */
 .btn-eliminar {
   padding: 4px;
   background: none;
@@ -106,6 +99,7 @@ body {
   color: #e74c3c;
 }
 
+/* Botón cancelar — contorno */
 .btn-cancelar {
   width: 100%;
   margin-top: 10px;
@@ -122,7 +116,7 @@ body {
   color: var(--color-primary);
 }
 
-/* --- Formularios y Campos de Entrada --- */
+/* Campos de formulario */
 .campo-contenedor {
   display: flex;
   flex-direction: column;
@@ -179,11 +173,7 @@ body {
 }
 
 
-/* ==========================================================================
-   3. ESTRUCTURA PERMANENTE (Navbar, Footer)
-   ========================================================================== */
-
-/* --- Navbar --- */
+/* Navbar — sticky con sombra */
 nav {
   position: sticky;
   top: 0;
@@ -223,7 +213,7 @@ nav a:hover,
   color: var(--color-primary);
 }
 
-/* --- Footer --- */
+/* Footer — fondo oscuro */
 footer {
   width: 100%;
   margin-top: auto;
@@ -266,11 +256,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   4. VISTA DE TIENDA / PRODUCTOS (Header, Filtros, Grid)
-   ========================================================================== */
-
-/* --- Header de la Página --- */
+/* Encabezado de página */
 .page-header {
   padding: 80px 30px 70px;
   text-align: center;
@@ -289,7 +275,7 @@ footer .links a:hover {
   font-size: 1rem;
 }
 
-/* --- Filtros --- */
+/* Filtros de categoría */
 .filtros {
   display: flex;
   justify-content: center;
@@ -315,7 +301,7 @@ footer .links a:hover {
   color: #fff;
 }
 
-/* --- Grid de Productos --- */
+/* Grid de productos */
 .productos {
   max-width: 1200px;
   margin: 0 auto;
@@ -328,7 +314,7 @@ footer .links a:hover {
   gap: 28px;
 }
 
-/* --- Cards de Producto --- */
+/* Card de producto */
 .card {
   background: var(--color-white);
   border-radius: var(--radius-md);
@@ -397,9 +383,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   5. CARRITO LATERAL (Sidebar panel)
-   ========================================================================== */
+/* Botón flotante del carrito */
 .carrito-btn {
   position: fixed;
   right: 28px;
@@ -425,6 +409,7 @@ footer .links a:hover {
   font-weight: 700;
 }
 
+/* Panel lateral del carrito */
 .carrito-panel {
   position: fixed;
   top: 0;
@@ -481,9 +466,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   6. ELEMENTOS INTERNOS DEL CARRITO (Panel y Página completa)
-   ========================================================================== */
+/* Ítems del carrito — panel y página */
 .item-carrito, 
 .item-carrito-page {
   display: flex;
@@ -546,9 +529,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   7. SECCIÓN / VISTA: PÁGINA DEL CARRITO FULL-WIDTH
-   ========================================================================== */
+/* Página completa del carrito — layout de dos columnas */
 .carrito-page {
   display: grid;
   grid-template-columns: 1fr 420px;
@@ -630,9 +611,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   8. RESUMEN DE COMPRA Y PASARELA DE PAGO
-   ========================================================================== */
+/* Resumen de compra */
 .resumen-box {
   padding: 20px;
   margin-bottom: 24px;
@@ -682,7 +661,7 @@ footer .links a:hover {
   cursor: not-allowed;
 }
 
-/* --- Opciones de Pago --- */
+/* Opciones de método de pago */
 .pago-opciones {
   display: flex;
   gap: 12px;
@@ -714,9 +693,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   9. OVERLAYS, MODALES Y VENTANAS DE CONFIRMACIÓN
-   ========================================================================== */
+/* Overlay de fondo para paneles y modales */
 .overlay {
   position: fixed;
   inset: 0;
@@ -728,6 +705,7 @@ footer .links a:hover {
   display: block;
 }
 
+/* Modal centrado */
 .modal {
   position: fixed;
   inset: 0;
@@ -771,7 +749,7 @@ footer .links a:hover {
   font-size: 0.88rem;
 }
 
-/* --- Estado: Confirmación Éxito --- */
+/* Pantalla de confirmación exitosa */
 .confirmacion {
   padding: 20px 0;
   text-align: center;
@@ -794,9 +772,7 @@ footer .links a:hover {
 }
 
 
-/* ==========================================================================
-   10. MEDIA QUERIES (Responsividad)
-   ========================================================================== */
+/* Responsive — móvil */
 @media (max-width: 768px) {
   nav {
     padding: 16px 20px;
