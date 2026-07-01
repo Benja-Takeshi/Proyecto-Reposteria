@@ -212,6 +212,32 @@ def panel_empleados(request):
                 u.delete()
                 messages.success(request, "Usuario eliminado con éxito.")
 
+        # 4. CATEGORIAS
+        elif accion == 'crear_categoria':
+            nombre = request.POST.get('nombre', '').strip()
+            if nombre:
+                Categoria.objects.create(nombre=nombre)
+                messages.success(request, f"Categoría '{nombre}' creada correctamente.")
+            else:
+                messages.error(request, "El nombre de la categoría no puede estar vacío.")
+
+        elif accion == 'editar_categoria':
+            cat = Categoria.objects.get(id=request.POST.get('categoria_id'))
+            cat.nombre = request.POST.get('nuevo_nombre')
+            cat.save()
+            messages.success(request, f"Categoría '{cat.nombre}' actualizada.")
+
+        elif accion == 'eliminar_categoria':
+            cat = Categoria.objects.get(id=request.POST.get('categoria_id'))
+            # Se usa un filtro explícito en vez de cat.producto_set porque el
+            # FK de Producto -> Categoria puede tener un related_name propio,
+            # lo que elimina el accessor automático "producto_set".
+            if Producto.objects.filter(categoria=cat).exists():
+                messages.error(request, f"No puedes eliminar '{cat.nombre}' porque tiene productos asociados.")
+            else:
+                cat.delete()
+                messages.success(request, "Categoría eliminada correctamente.")
+
         return redirect('panel_empleados')
 
     # Contexto para el template
@@ -222,7 +248,6 @@ def panel_empleados(request):
         'clientes':   User.objects.all().order_by('-is_superuser', '-is_staff', 'username'),
     }
     return render(request, 'Reposteria_app/panel_empleados.html', context)
-
 
 # ── CREAR PRODUCTO DESDE PANEL ───────────────────────────────────────────────
 @login_required

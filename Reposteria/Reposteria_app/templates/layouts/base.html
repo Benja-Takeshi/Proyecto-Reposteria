@@ -63,8 +63,9 @@
 
         {# Botón carrito #}
         <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
-          <a class="btn text-white px-4" href="{% url 'carrito' %}" style="background-color: #b85a1c; border-radius: 50px; font-weight: bold;">
-            🛒 Carrito
+          <a class="btn text-white px-4 d-flex align-items-center gap-2" href="{% url 'carrito' %}" style="background-color: #b85a1c; border-radius: 50px; font-weight: bold;">
+            <span>🛒 Carrito</span>
+            <span id="carrito-count-nav" class="badge bg-white text-dark rounded-pill" style="min-width: 24px;">0</span>
           </a>
         </li>
 

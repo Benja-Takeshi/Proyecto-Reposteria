@@ -201,6 +201,20 @@ nav ul {
   list-style: none;
 }
 
+#carrito-count-nav {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 8px;
+  background: #fff;
+  color: #333;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 nav a, 
 .nav-link {
   color: var(--color-text);
@@ -780,6 +794,20 @@ footer .links a:hover {
     gap: 12px;
   }
   
+  nav ul {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  #carrito-count-nav {
+    min-width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+    padding: 0 10px;
+  }
+  
   .productos {
     padding: 24px 20px 40px;
   }
@@ -795,5 +823,18 @@ footer .links a:hover {
   
   .carrito-page {
     grid-template-columns: 1fr;
+  }
+
+  .cta-hero {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .cta-hero .btn {
+    width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
